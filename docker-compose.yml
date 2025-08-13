@@ -1,65 +1,74 @@
-services:
-    database:
-        image: mongo
-        restart: always
-        command: --port 37017
-        env_file:
-            - ./.env
-        environment:
-            - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-            - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-        volumes:
-          - law-assist-db:/data/db
-        # ports:
-        #   - "37017:37017"
-        network_mode: host
-    backend:
-        image: lawassist/backend:prod-latest
-        restart: always
-        depends_on:
-            - database
-        env_file:
-            - ./.env
-        # ports:
-        #     - "29001:29001"
-        network_mode: host
-        deploy:
-            update_config:
-                order: start-first
-        pull_policy: always
-        labels:
-            - "com.centurylinklabs.watchtower.enable=true"
+networks:
+  law-assist-net:
+    driver: bridge
+  cloudflare-net:
+    external: true
 
-    frontend:
-        image: lawassist/frontend:prod-latest
-        restart: always
-        depends_on:
-            - backend
-        env_file:
-            - ./.env
-        # ports:
-        #     - "29000:29000"
-        network_mode: host
-        pull_policy: always
-        labels:
-            - "com.centurylinklabs.watchtower.enable=true"
-    ai-law-linking:
-        image: lawassist/ai-law-linking:prod-latest
-        restart: always
-        depends_on:
-            - backend
-        env_file:
-              - ./.env
-        # ports:
-        #     - "28000:28000"
-        network_mode: host
-        deploy:
-          resources:
-            reservations:
-              devices:
-                - driver: nvidia
-                  count: all
-                  capabilities: [gpu]
-        pull_policy: always
-volumes:
-  law-assist-db:
+services:
+  database:
+    image: mongo
+    restart: always
+    command: --port 37017
+    env_file:
+      - ./.env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - ./law-assist-db:/data/db
+    # ports:
+    #   - "37017:37017"
+    networks:
+      - law-assist-net
+
+  backend:
+    image: lawassist/backend:prod-latest
+    restart: always
+    depends_on:
+      - database
+    env_file:
+      - ./.env
+    expose:
+      - 29001
+    pull_policy: always
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - law-assist-net
+      - cloudflare-net
+
+  frontend:
+    image: lawassist/frontend:prod-latest
+    restart: always
+    depends_on:
+      - backend
+    env_file:
+      - ./.env
+    expose:
+      - 29000
+    pull_policy: always
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - law-assist-net
+      - cloudflare-net
+
+  ai-law-linking:
+    image: lawassist/ai-law-linking:prod-latest
+    restart: always
+    depends_on:
+      - backend
+    env_file:
+      - ./.env
+    # expose:
+    #   - 28000
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    pull_policy: always
+    networks:
+      - law-assist-net
