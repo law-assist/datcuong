@@ -5,8 +5,13 @@
 [submodule "backend"]
 	path = BE
 	url = https://github.com/law-assist/datcuong-backend.git
-	branch = deg
+	branch = dev
 [submodule "AI-linking-laws"]
 	path = AI_linking_laws
 	url = https://github.com/law-assist/datcuong-ai-law-linking.git
 	branch = dev
+[submodule "AI_chatbot"]
+	path = AI_chatbot
+	url = https://github.com/law-assist/datcuong-ai-chatbot.git
+	branch = dev
+
