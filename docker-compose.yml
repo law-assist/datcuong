@@ -1,9 +1,27 @@
+networks:
+  law-dev-network:
+    driver: bridge
+
 services:
   database:
     image: mongo
     restart: always
+    command: --port 27017
+    ports:
+      - "27017:27018"
     volumes:
       - law-dev-database:/data/db
+    networks:
+      - law-dev-network
+  vector-db:
+    image: chromadb/chroma
+    restart: always
+    volumes:
+      - law-dev-vectordb:/data
+    ports:
+      - "8000:8001"
+    networks:
+      - law-dev-network
   frontend:
     image: lawassist/frontend:dev-latest
     volumes:
@@ -19,18 +37,25 @@ services:
     volumes:
       - .:/workspace:cached
       - backend-dev-node-module:/workspace/BE/node_modules
+    depends_on:
+      - database
     environment:
-      - MONGODB_URI=mongodb://localhost:27017/law_linking
+      - MONGODB_URI=mongodb://database:27017/law_linking
+      - AI_HOST=http://ai-law-linking:8000/reference_matching/id_input
     command: sleep infinity
-    network_mode: service:database
+    networks: 
+      - law-dev-network
   ai-law-linking:
     image: lawassist/ai-law-linking:dev-latest
     volumes:
       - .:/workspace:cached
+    depends_on:
+      - database
     environment:
-      - DATABASE_URI=mongodb://localhost:27017/law_linking
+      - DATABASE_URI=mongodb://database:27017/law_linking
     command: sleep infinity
-    network_mode: service:database
+    networks: 
+      - law-dev-network
     deploy:
       resources:
         reservations:
@@ -38,7 +63,20 @@ services:
             - driver: nvidia
               count: all # alternatively, use `count: all` for all GPUs
               capabilities: [gpu]
+  ai-chatbot:
+    image: lawassist/ai-chatbot:dev-latest
+    volumes:
+      - .:/workspace:cached
+    depends_on:
+      - database
+    environment:
+      - MONGO_URI=mongodb://database:27017/
+    command: sleep infinity
+    networks: 
+      - law-dev-network
+
 volumes:
-  law-dev-database:
+  law-dev-database: # Persistent storage for MongoDB
+  law-dev-vectordb: # Persistent storage for ChromaDB
   frontend-dev-node-module:
   backend-dev-node-module:

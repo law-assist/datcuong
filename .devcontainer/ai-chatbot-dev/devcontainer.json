@@ -1,12 +1,12 @@
 {
     // Dev container name
-    "name": "AI law linking dev environment",
+    "name": "AI chatbot dev environment",
     // Docker compose file for dev environment
     "dockerComposeFile": "../../docker-compose.yml",
     // Service run on dev container
-    "service": "ai-law-linking",
+    "service": "ai-chatbot",
     // Path of workspace folder inside container
-    "workspaceFolder": "/workspace/AI_linking_laws",
+    "workspaceFolder": "/workspace/AI_chatbot",
 
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     "forwardPorts": [8000],
@@ -14,9 +14,7 @@
     "shutdownAction": "none",
 
     // Use 'postCreateCommand' to run command after container created.
-    "postCreateCommand": [
-        "nvidia-smi"
-    ],
+    "postCreateCommand": "python -V",
     
     // Configure tool-specific properties.
     "customizations": {
