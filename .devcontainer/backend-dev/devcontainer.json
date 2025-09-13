@@ -9,7 +9,6 @@
 	"workspaceFolder": "/workspace/BE",
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally
-	// One for exposing BE server, one for Database connection
 	"forwardPorts": [29003],
 	// Prevent from accidentally shutting down both BE and FE container by closing one window
 	"shutdownAction": "none",

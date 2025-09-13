@@ -8,7 +8,7 @@ services:
     restart: always
     command: --port 27017
     ports:
-      - "27017:27018"
+      - "27018:27017"
     volumes:
       - law-dev-database:/data/db
     networks:
@@ -19,11 +19,12 @@ services:
     volumes:
       - law-dev-vectordb:/data
     ports:
-      - "8000:8001"
+      - "8001:8000"
     networks:
       - law-dev-network
   frontend:
     image: lawassist/frontend:dev-latest
+    pull_policy: always
     volumes:
       - .:/workspace:cached
       - frontend-dev-node-module:/workspace/FE/node_modules
@@ -34,6 +35,7 @@ services:
     network_mode: service:backend
   backend:
     image: lawassist/backend:dev-latest
+    pull_policy: always
     volumes:
       - .:/workspace:cached
       - backend-dev-node-module:/workspace/BE/node_modules
@@ -47,6 +49,7 @@ services:
       - law-dev-network
   ai-law-linking:
     image: lawassist/ai-law-linking:dev-latest
+    pull_policy: always
     volumes:
       - .:/workspace:cached
     depends_on:
@@ -65,6 +68,7 @@ services:
               capabilities: [gpu]
   ai-chatbot:
     image: lawassist/ai-chatbot:dev-latest
+    pull_policy: always
     volumes:
       - .:/workspace:cached
     depends_on:
